@@ -2,7 +2,7 @@
    No framework, no build step. Hash-based routing so it works on GitHub Pages
    and when opened straight from a folder.
 
-   Data lives in data/*.js (see README for the shape). The search logic below is
+   Data lives in the four *.js data files next to this one (see README for the shape). The search logic below is
    the same logic a backend would run in V2; it is only here in the browser so
    the demo can run with zero infrastructure. */
 (function () {

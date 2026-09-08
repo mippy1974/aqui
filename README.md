@@ -32,12 +32,12 @@ The last page of the brief lists the points that need to be assessed. Here is ho
 
 | Brief requirement | In this demo | In V1 |
 | --- | --- | --- |
-| Brand database with multiple categories | `data/brands.js`, each brand has a `categories` array | Same shape, stored in a database table plus a brand↔category link table |
-| Central product database | `data/products.js`, one record per product | Same, as a `products` table managed only through the admin area |
+| Brand database with multiple categories | `brands.js`, each brand has a `categories` array | Same shape, stored in a database table plus a brand↔category link table |
+| Central product database | `products.js`, one record per product | Same, as a `products` table managed only through the admin area |
 | Many-to-many products ↔ brands | Brands hold a `products` array of product ids | A `brand_products` link table |
 | English and Spanish names for the same product | Every product has `en` and `es` on one record | Same |
 | Product search with suggestions | `suggest()` in `app.js` matches both languages, prefix first | Same logic on the server, or the product list cached in the app |
-| Manually selectable search location | Dropdown of Panama places with coordinates (`data/places.js`) | A places table, or a geocoding service for free-text entry |
+| Manually selectable search location | Dropdown of Panama places with coordinates (`places.js`) | A places table, or a geocoding service for free-text entry |
 | Optional "use my location" | Browser geolocation, snapped to the nearest known place for the province | Same |
 | Multiple retail locations per brand | `retail` array per brand, unlimited length | A `retail_locations` table with a brand id |
 | Geographic coordinates for retail locations | Each retail location has `lat` and `lng` | Same |
@@ -57,11 +57,10 @@ The last page of the brief lists the points that need to be assessed. Here is ho
 index.html          the app shell
 styles.css          styling (cream, sand, olive palette from the brief)
 app.js              routing, search logic, bilingual text, rendering
-data/
-  categories.js     the 7 working categories (EN + ES)
-  products.js       the central product list (EN + ES)
-  places.js         searchable Panama places with coordinates and provinces
-  brands.js         21 invented demo brands + the Mission page text
+categories.js       the 7 working categories (EN + ES)
+products.js         the central product list (EN + ES)
+places.js           searchable Panama places with coordinates and provinces
+brands.js           21 invented demo brands + the Mission page text
 ```
 
 ## Publishing on GitHub Pages
