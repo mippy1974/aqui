@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4efe6">
+  <title>aquí · made in Panama, for Panama</title>
+  <meta name="description" content="aquí is a curated discovery app for natural and artisan-made products in Panama. Find what is available and where to get it.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23e8dfd0'/%3E%3Ctext x='32' y='42' font-family='Georgia,serif' font-size='30' text-anchor='middle' fill='%234a4a2f'%3Eaq%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <div id="app" class="phone">
+    <main id="view" class="view"></main>
+    <nav id="tabbar" class="tabbar" aria-label="Main"></nav>
+  </div>
+
+  <!-- Data (in V2 these become API calls to a database with the same shape) -->
+  <script src="data/categories.js"></script>
+  <script src="data/products.js"></script>
+  <script src="data/places.js"></script>
+  <script src="data/brands.js"></script>
+  <!-- App -->
+  <script src="app.js"></script>
+</body>
+</html>
