@@ -352,6 +352,7 @@ function viewHome() {
   var s = t();
   var html =
     '<p class="page-sub" style="margin-top:2px">' + esc(s.tagline) + '</p>' +
+    '<div class="hero-photo"><img src="assets/hero.jpg" alt=""></div>' +
     '<div class="demo-note">' + esc(s.demoNote) + '</div>' +
     searchFormHTML({}) +
     '<div class="section-label">' + esc(s.browseTitle) + '</div>' +

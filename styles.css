@@ -42,8 +42,8 @@ a{color:var(--ink);text-decoration:none}
   display:flex;align-items:center;justify-content:space-between;
   padding:18px 20px 10px;
 }
-.brandmark{display:flex;align-items:center;min-height:34px}
-.logo-img{height:34px;width:auto}
+.brandmark{display:flex;align-items:center;min-height:42px}
+.logo-img{height:42px;width:auto}
 .logo-type{
   font:400 30px/1 Georgia,"Times New Roman",serif;
   color:var(--ink);letter-spacing:.01em;
@@ -55,6 +55,16 @@ a{color:var(--ink);text-decoration:none}
 }
 .lang-btn.on{color:var(--ink);font-weight:600}
 .lang-sep{width:1px;height:12px;background:var(--line)}
+
+/* ---------- home hero photo ---------- */
+.hero-photo{
+  border-radius:var(--r);overflow:hidden;margin:2px 0 18px;
+  background:var(--paper);border:1px solid var(--line-soft);
+  aspect-ratio:3/2;max-width:100%;
+}
+.hero-photo img{
+  width:100%;height:100%;object-fit:cover;object-position:center 58%;display:block;
+}
 
 /* ---------- generic page bits ---------- */
 main{padding:0 20px 32px;outline:none}
