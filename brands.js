@@ -1,500 +1,445 @@
-// Brands are the central entity. Every brand record carries:
-//   location  : where the brand is based or produces (NOT used for radius search)
-//   retail    : physical points of sale with coordinates (USED for radius search)
-//   shipping  : { type: "nationwide" } | { type: "provinces", provinces: [...] } | { type: "none" }
-//   products  : ids from products.js (many-to-many)
-//   categories: ids from categories.js (a brand can have several)
-//   about     : English and Spanish text
-//   photos    : placeholder tiles for the demo (color + icon). Real photos replace these later.
-// All brands, people and shops below are invented for the demo.
-window.AQUI = window.AQUI || {};
-AQUI.brands = [
+/* aquí - brands. The brand is the central public entity in the app.
+
+   Shape of one brand:
+     slug        url id
+     name        display name, same in both languages
+     tagline     one line, en / es
+     about       About section, en / es
+     categories  one or more category ids from data/categories.js
+     products    product ids from data/products.js (many to many)
+     base        where the brand is based or produces. NOT used for radius search.
+     pos         retail points of sale. THESE are what the radius search uses.
+                 each has a shop name, a town, and its own coordinates.
+     shipping    { type: 'nationwide' | 'provinces' | 'none', provinces: [...] }
+     links       website, instagram, whatsapp
+
+   Photos: this demo uses generated tiles instead of stock images, so nothing
+   here claims to be a real brand. Swap `photo` in for a real path later. */
+
+window.BRANDS = [
   {
-    id: "fermentos-de-cocle",
-    name: "Fermentos de Coclé",
-    tagline: { en: "Small-batch ferments from the interior", es: "Fermentos en pequeños lotes del interior" },
-    about: {
-      en: "A two-person kitchen in Aguadulce making kimchi, sauerkraut and kombucha with vegetables from nearby farms. Everything is fermented slowly, without vinegar or preservatives.",
-      es: "Una cocina de dos personas en Aguadulce que hace kimchi, chucrut y kombucha con vegetales de fincas cercanas. Todo se fermenta lentamente, sin vinagre ni conservantes."
-    },
-    location: { place: "aguadulce", label: "Aguadulce, Coclé", lat: 8.2440, lng: -80.5430 },
+    slug: "fermentos-del-istmo",
+    name: "Fermentos del Istmo",
+    tagline: { en: "Small batch ferments from Panama City", es: "Fermentos artesanales de Ciudad de Panamá" },
+    about: { en: "A two person fermentation kitchen in Casco Antiguo. Everything is made in small batches with vegetables bought the same week from growers in Cerro Punta and Coclé. Jars are returnable.",
+             es: "Una cocina de fermentación de dos personas en el Casco Antiguo. Todo se elabora en lotes pequeños con vegetales comprados la misma semana a productores de Cerro Punta y Coclé. Los frascos son retornables." },
     categories: ["food"],
-    products: ["kimchi", "sauerkraut", "kombucha", "hot-sauce"],
-    retail: [
-      { name: "Mercado Público de Penonomé", label: "Penonomé, Coclé", lat: 8.5180, lng: -80.3570 },
-      { name: "Tienda Verde Aguadulce", label: "Aguadulce, Coclé", lat: 8.2450, lng: -80.5400 },
-      { name: "Feria del Valle (Sundays)", label: "El Valle de Antón, Coclé", lat: 8.6010, lng: -80.1260 }
+    products: ["kimchi", "kombucha", "sauerkraut", "water-kefir"],
+    base: { town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9824, lng: -79.5199 },
+    pos: [
+      { name: "Mercado Orgánico Casco", town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9784, lng: -79.5239 },
+      { name: "Feria de El Valle", town: "El Valle de Antón", townEs: "El Valle de Antón", province: "Coclé", lat: 8.6, lng: -80.1333 },
+      { name: "Tienda Natural Penonomé", town: "Penonomé", townEs: "Penonomé", province: "Coclé", lat: 8.5207, lng: -80.346 }
     ],
-    shipping: { type: "provinces", provinces: ["cocle", "panama", "panama-oeste"] },
-    links: { instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000001" },
-    tone: "#8a9a5b",
-    photos: [ { bg: "#8a9a5b", icon: "🥬" }, { bg: "#c9a66b", icon: "🫙" }, { bg: "#b5651d", icon: "🌶️" } ],
-    featured: true
+    shipping: { type: "provinces", provinces: ["Panamá", "Panamá Oeste", "Coclé"] },
+    links: { website: "fermentosdelistmo.com", instagram: "fermentosdelistmo", whatsapp: "+507 6100 0101" },
+    published: true
   },
   {
-    id: "kimchi-panama",
-    name: "Kimchi Panamá",
-    tagline: { en: "Korean-Panamanian ferments, shipped anywhere", es: "Fermentos coreano-panameños, envío a todo el país" },
-    about: {
-      en: "Founded by a Korean-Panamanian family in Panama City. Classic napa kimchi plus a local version with ají chombo. Ships nationwide in insulated boxes.",
-      es: "Fundada por una familia coreano-panameña en la Ciudad de Panamá. Kimchi clásico de repollo napa y una versión local con ají chombo. Envíos a todo el país en cajas aisladas."
-    },
-    location: { place: "panama-city", label: "Panama City", lat: 8.9900, lng: -79.5100 },
-    categories: ["food"],
-    products: ["kimchi", "hot-sauce"],
-    retail: [
-      { name: "Mercado Urbano, Obarrio", label: "Panama City", lat: 8.9860, lng: -79.5200 },
-      { name: "Riba Smith Costa del Este", label: "Panama City", lat: 9.0080, lng: -79.4680 }
-    ],
-    shipping: { type: "nationwide" },
-    links: { website: "https://example.com", instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000002" },
-    tone: "#b5651d",
-    photos: [ { bg: "#b5651d", icon: "🥬" }, { bg: "#8a9a5b", icon: "📦" } ],
-    featured: false
-  },
-  {
-    id: "raiz-fermentada",
-    name: "Raíz Fermentada",
-    tagline: { en: "Highland ferments from Boquete", es: "Fermentos de las tierras altas de Boquete" },
-    about: {
-      en: "Kimchi, sauerkraut and kombucha made with Boquete vegetables and mountain water. Sold only in Chiriquí; no shipping yet.",
-      es: "Kimchi, chucrut y kombucha hechos con vegetales de Boquete y agua de montaña. Solo se vende en Chiriquí; todavía sin envíos."
-    },
-    location: { place: "boquete", label: "Boquete, Chiriquí", lat: 8.7800, lng: -82.4400 },
+    slug: "fermentos-azuero",
+    name: "Fermentos Azuero",
+    tagline: { en: "Ferments and kombucha from Herrera", es: "Fermentos y kombucha de Herrera" },
+    about: { en: "Started as a home project during the rainy season and grew into a small production room behind the family house in Chitré. Deliveries go out twice a week by bus to the interior.",
+             es: "Comenzó como un proyecto casero en la temporada de lluvias y creció hasta convertirse en una pequeña sala de producción detrás de la casa familiar en Chitré. Los envíos salen dos veces por semana en bus hacia el interior." },
     categories: ["food"],
     products: ["kimchi", "sauerkraut", "kombucha"],
-    retail: [
-      { name: "Boquete Tuesday Market", label: "Boquete, Chiriquí", lat: 8.7810, lng: -82.4380 },
-      { name: "Organic Corner David", label: "David, Chiriquí", lat: 8.4300, lng: -82.4300 }
+    base: { town: "Chitré", townEs: "Chitré", province: "Herrera", lat: 7.9667, lng: -80.4333 },
+    pos: [
+      { name: "Súper Natural Chitré", town: "Chitré", townEs: "Chitré", province: "Herrera", lat: 7.9627, lng: -80.4373 },
+      { name: "Feria de Las Tablas", town: "Las Tablas", townEs: "Las Tablas", province: "Los Santos", lat: 7.7667, lng: -80.2833 }
     ],
-    shipping: { type: "none" },
-    links: { instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000003" },
-    tone: "#6b7a4a",
-    photos: [ { bg: "#6b7a4a", icon: "🥬" }, { bg: "#a3b18a", icon: "⛰️" } ],
-    featured: false
+    shipping: { type: "provinces", provinces: ["Herrera", "Los Santos", "Coclé", "Veraguas"] },
+    links: { website: "", instagram: "fermentosazuero", whatsapp: "+507 6100 0102" },
+    published: true
   },
   {
-    id: "bocas-ferments",
-    name: "Bocas Ferments",
-    tagline: { en: "Island kombucha and kimchi", es: "Kombucha y kimchi de la isla" },
-    about: {
-      en: "Made on Isla Colón with tropical fruit second ferments. Available on the islands and by boat delivery within Bocas del Toro.",
-      es: "Hecho en Isla Colón con segundas fermentaciones de fruta tropical. Disponible en las islas y con entrega en lancha dentro de Bocas del Toro."
-    },
-    location: { place: "bocas-town", label: "Bocas del Toro", lat: 9.3400, lng: -82.2400 },
+    slug: "kimchi-volcan",
+    name: "Kimchi Volcán",
+    tagline: { en: "Highland kimchi and chili ferments", es: "Kimchi y fermentos de chile de tierras altas" },
+    about: { en: "Cabbage, radish and chili grown at 1,600 metres in Volcán. The cool air lets the ferment go slowly, which is where the flavour comes from. Sold only in Chiriquí for now.",
+             es: "Repollo, rábano y chile cultivados a 1,600 metros en Volcán. El aire frío permite una fermentación lenta, y de ahí viene el sabor. Por ahora se vende solo en Chiriquí." },
     categories: ["food"],
-    products: ["kombucha", "kimchi"],
-    retail: [
-      { name: "Isla Colón Farmers Market", label: "Bocas del Toro", lat: 9.3410, lng: -82.2420 }
+    products: ["kimchi", "sauerkraut", "hot-sauce"],
+    base: { town: "Volcán", townEs: "Volcán", province: "Chiriquí", lat: 8.7833, lng: -82.6333 },
+    pos: [
+      { name: "Mercado de Volcán", town: "Volcán", townEs: "Volcán", province: "Chiriquí", lat: 8.7793, lng: -82.6373 },
+      { name: "Tuesday Market Boquete", town: "Boquete", townEs: "Boquete", province: "Chiriquí", lat: 8.78, lng: -82.44 },
+      { name: "Orgánica David", town: "David", townEs: "David", province: "Chiriquí", lat: 8.4373, lng: -82.4293 }
     ],
-    shipping: { type: "provinces", provinces: ["bocas"] },
-    links: { instagram: "https://instagram.com/" },
-    tone: "#4f8a8b",
-    photos: [ { bg: "#4f8a8b", icon: "🍍" }, { bg: "#c9a66b", icon: "🫙" } ],
-    featured: false
+    shipping: { type: "provinces", provinces: ["Chiriquí"] },
+    links: { website: "", instagram: "kimchivolcan", whatsapp: "+507 6100 0103" },
+    published: true
   },
   {
-    id: "masa-madre-pty",
-    name: "Masa Madre PTY",
-    tagline: { en: "Naturally leavened bread, baked daily", es: "Pan de fermentación natural, horneado a diario" },
-    about: {
-      en: "A neighborhood bakery in San Francisco, Panama City. Sourdough loaves, granola and seasonal jams. Delivery within Panama City and Panamá Oeste.",
-      es: "Una panadería de barrio en San Francisco, Ciudad de Panamá. Panes de masa madre, granola y mermeladas de temporada. Entregas en Ciudad de Panamá y Panamá Oeste."
-    },
-    location: { place: "panama-city", label: "Panama City", lat: 8.9930, lng: -79.5030 },
+    slug: "masa-madre-boquete",
+    name: "Masa Madre Boquete",
+    tagline: { en: "Sourdough baked the same morning", es: "Masa madre horneada la misma mañana" },
+    about: { en: "A wood fired oven above the Caldera road. The starter has been going since 2019. Loaves come out Thursday and Saturday and are usually gone by ten.",
+             es: "Un horno de leña sobre el camino a Caldera. La masa madre vive desde 2019. Los panes salen jueves y sábado, y normalmente se agotan antes de las diez." },
     categories: ["food"],
-    products: ["sourdough", "granola", "jam"],
-    retail: [
-      { name: "Masa Madre bakery, San Francisco", label: "Panama City", lat: 8.9930, lng: -79.5030 },
-      { name: "Coronado Farmers Market (Sat)", label: "Coronado, Panamá Oeste", lat: 8.5200, lng: -79.8850 }
+    products: ["sourdough", "granola"],
+    base: { town: "Boquete", townEs: "Boquete", province: "Chiriquí", lat: 8.78, lng: -82.44 },
+    pos: [
+      { name: "Tuesday Market Boquete", town: "Boquete", townEs: "Boquete", province: "Chiriquí", lat: 8.776, lng: -82.444 },
+      { name: "Café Central David", town: "David", townEs: "David", province: "Chiriquí", lat: 8.4333, lng: -82.4333 }
     ],
-    shipping: { type: "provinces", provinces: ["panama", "panama-oeste"] },
-    links: { website: "https://example.com", instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000005" },
-    tone: "#c9a66b",
-    photos: [ { bg: "#c9a66b", icon: "🍞" }, { bg: "#8a9a5b", icon: "🥣" }, { bg: "#b5651d", icon: "🍓" } ],
-    featured: true
+    shipping: { type: "none", provinces: [] },
+    links: { website: "", instagram: "masamadreboquete", whatsapp: "+507 6100 0104" },
+    published: true
   },
   {
-    id: "horno-de-lena-boquete",
-    name: "Horno de Leña Boquete",
-    tagline: { en: "Wood-fired sourdough in the highlands", es: "Masa madre a leña en las tierras altas" },
-    about: {
-      en: "Sourdough, granola and peanut butter from a wood-fired oven in Alto Boquete. Sold at the Tuesday market and a few cafés in town.",
-      es: "Masa madre, granola y mantequilla de maní de un horno de leña en Alto Boquete. Se vende en el mercado de los martes y en algunos cafés del pueblo."
-    },
-    location: { place: "boquete", label: "Boquete, Chiriquí", lat: 8.7900, lng: -82.4350 },
+    slug: "cacao-portobelo",
+    name: "Cacao Portobelo",
+    tagline: { en: "Bean to bar cacao from the Caribbean coast", es: "Cacao de grano a barra de la costa caribeña" },
+    about: { en: "Cacao is fermented and dried on the coast, then stone ground in Portobelo. The bars carry the name of the farm they came from.",
+             es: "El cacao se fermenta y se seca en la costa, y luego se muele en piedra en Portobelo. Cada barra lleva el nombre de la finca de origen." },
     categories: ["food"],
-    products: ["sourdough", "granola", "peanut-butter"],
-    retail: [
-      { name: "Boquete Tuesday Market", label: "Boquete, Chiriquí", lat: 8.7810, lng: -82.4380 },
-      { name: "Café Ruiz storefront", label: "Boquete, Chiriquí", lat: 8.7750, lng: -82.4410 }
+    products: ["cacao-nibs", "chocolate-bar", "cacao-paste"],
+    base: { town: "Portobelo", townEs: "Portobelo", province: "Colón", lat: 9.55, lng: -79.65 },
+    pos: [
+      { name: "Taller Portobelo", town: "Portobelo", townEs: "Portobelo", province: "Colón", lat: 9.546, lng: -79.654 },
+      { name: "Mercado Colón", town: "Colón", townEs: "Colón", province: "Colón", lat: 9.3592, lng: -79.9014 },
+      { name: "Mercado Orgánico Casco", town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9864, lng: -79.5159 }
     ],
-    shipping: { type: "none" },
-    links: { instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000006" },
-    tone: "#a0522d",
-    photos: [ { bg: "#a0522d", icon: "🍞" }, { bg: "#6b7a4a", icon: "🔥" } ],
-    featured: false
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "cacaoportobelo.com", instagram: "cacaoportobelo", whatsapp: "+507 6100 0105" },
+    published: true
   },
   {
-    id: "cacao-de-bocas",
-    name: "Cacao de Bocas",
-    tagline: { en: "Bean-to-bar chocolate from Bocas del Toro", es: "Chocolate del grano a la barra de Bocas del Toro" },
-    about: {
-      en: "Cacao grown by Ngäbe families and processed on a small farm near Almirante. Bars, nibs and drinking chocolate. Ships nationwide.",
-      es: "Cacao cultivado por familias Ngäbe y procesado en una pequeña finca cerca de Almirante. Barras, nibs y chocolate para beber. Envíos a todo el país."
-    },
-    location: { place: "bocas-town", label: "Bocas del Toro", lat: 9.3000, lng: -82.3900 },
+    slug: "miel-de-azuero",
+    name: "Miel de Azuero",
+    tagline: { en: "Raw honey and beeswax from Los Santos", es: "Miel cruda y cera de abeja de Los Santos" },
+    about: { en: "Hives sit in the dry forest near Pedasí. Honey is never heated, so it sets firm in the cooler months. Wax left over from harvest becomes candles.",
+             es: "Las colmenas están en el bosque seco cerca de Pedasí. La miel nunca se calienta, por eso se cristaliza en los meses más frescos. La cera que sobra de la cosecha se convierte en velas." },
+    categories: ["food", "ritual"],
+    products: ["raw-honey", "beeswax-candle"],
+    base: { town: "Pedasí", townEs: "Pedasí", province: "Los Santos", lat: 7.5333, lng: -80.0333 },
+    pos: [
+      { name: "Tienda del Pueblo Pedasí", town: "Pedasí", townEs: "Pedasí", province: "Los Santos", lat: 7.5293, lng: -80.0373 },
+      { name: "Feria de Las Tablas", town: "Las Tablas", townEs: "Las Tablas", province: "Los Santos", lat: 7.7667, lng: -80.2833 },
+      { name: "Súper Natural Chitré", town: "Chitré", townEs: "Chitré", province: "Herrera", lat: 7.9707, lng: -80.4293 }
+    ],
+    shipping: { type: "provinces", provinces: ["Los Santos", "Herrera", "Panamá"] },
+    links: { website: "", instagram: "mieldeazuero", whatsapp: "+507 6100 0106" },
+    published: true
+  },
+  {
+    slug: "cafe-alto-quiel",
+    name: "Café Alto Quiel",
+    tagline: { en: "Single farm coffee, roasted to order", es: "Café de una sola finca, tostado por encargo" },
+    about: { en: "Two hectares above Alto Quiel, picked by hand over four passes. Roasting happens on Mondays and the bags are dated, not stamped with a best before.",
+             es: "Dos hectáreas sobre Alto Quiel, cosechadas a mano en cuatro pasadas. El tueste es los lunes y las bolsas llevan fecha de tostado, no fecha de vencimiento." },
     categories: ["food"],
-    products: ["chocolate", "cacao-nibs"],
-    retail: [
-      { name: "Farm shop, Almirante road", label: "Bocas del Toro", lat: 9.3000, lng: -82.3900 },
-      { name: "Casco Viejo artisan market", label: "Panama City", lat: 8.9520, lng: -79.5340 },
-      { name: "Boquete Tuesday Market", label: "Boquete, Chiriquí", lat: 8.7810, lng: -82.4380 }
+    products: ["coffee"],
+    base: { town: "Boquete", townEs: "Boquete", province: "Chiriquí", lat: 8.78, lng: -82.44 },
+    pos: [
+      { name: "Tuesday Market Boquete", town: "Boquete", townEs: "Boquete", province: "Chiriquí", lat: 8.776, lng: -82.444 },
+      { name: "Café Central David", town: "David", townEs: "David", province: "Chiriquí", lat: 8.4333, lng: -82.4333 },
+      { name: "Mercado Orgánico Casco", town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9864, lng: -79.5159 }
     ],
-    shipping: { type: "nationwide" },
-    links: { website: "https://example.com", instagram: "https://instagram.com/" },
-    tone: "#5c4033",
-    photos: [ { bg: "#5c4033", icon: "🍫" }, { bg: "#8a9a5b", icon: "🌱" }, { bg: "#c9a66b", icon: "☕" } ],
-    featured: true
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "altoquiel.com", instagram: "cafealtoquiel", whatsapp: "+507 6100 0107" },
+    published: true
   },
   {
-    id: "finca-luz-coffee",
-    name: "Finca Luz",
-    tagline: { en: "Specialty coffee from a family farm", es: "Café de especialidad de una finca familiar" },
-    about: {
-      en: "Third-generation coffee farm above Boquete. Washed and natural lots, roasted weekly. Also sells raw honey from the farm's hives.",
-      es: "Finca cafetalera de tercera generación sobre Boquete. Lotes lavados y naturales, tostados cada semana. También vende miel cruda de las colmenas de la finca."
-    },
-    location: { place: "boquete", label: "Boquete, Chiriquí", lat: 8.8100, lng: -82.4500 },
+    slug: "kombucha-tropical",
+    name: "Kombucha Tropical",
+    tagline: { en: "Kombucha and water kefir brewed in La Chorrera", es: "Kombucha y kéfir de agua elaborados en La Chorrera" },
+    about: { en: "Flavoured with whatever is in season along the Pacific coast: nance, guanábana, tamarind, ginger. Bottles are glass and come back for refill at the markets.",
+             es: "Saborizada con lo que está en temporada en la costa del Pacífico: nance, guanábana, tamarindo, jengibre. Las botellas son de vidrio y regresan para rellenar en las ferias." },
     categories: ["food"],
-    products: ["coffee", "honey"],
-    retail: [
-      { name: "Finca Luz farm store", label: "Boquete, Chiriquí", lat: 8.8100, lng: -82.4500 },
-      { name: "Volcán Saturday Market", label: "Volcán, Chiriquí", lat: 8.7700, lng: -82.6300 }
+    products: ["kombucha", "water-kefir"],
+    base: { town: "La Chorrera", townEs: "La Chorrera", province: "Panamá Oeste", lat: 8.88, lng: -79.7833 },
+    pos: [
+      { name: "Feria La Chorrera", town: "La Chorrera", townEs: "La Chorrera", province: "Panamá Oeste", lat: 8.876, lng: -79.7873 },
+      { name: "Coronado Market", town: "Coronado", townEs: "Coronado", province: "Panamá Oeste", lat: 8.5333, lng: -79.95 },
+      { name: "Gorgona Beach Store", town: "Gorgona", townEs: "Gorgona", province: "Panamá Oeste", lat: 8.554, lng: -79.8793 },
+      { name: "Mercado Orgánico Casco", town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9784, lng: -79.5239 }
     ],
-    shipping: { type: "nationwide" },
-    links: { website: "https://example.com", instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000008" },
-    tone: "#7b4b2a",
-    photos: [ { bg: "#7b4b2a", icon: "☕" }, { bg: "#c9a66b", icon: "🍯" } ],
-    featured: true
+    shipping: { type: "provinces", provinces: ["Panamá", "Panamá Oeste"] },
+    links: { website: "", instagram: "kombuchatropicalpa", whatsapp: "+507 6100 0108" },
+    published: true
   },
   {
-    id: "queseria-volcan",
-    name: "Quesería Volcán",
-    tagline: { en: "Aged cheeses from the slopes of Barú", es: "Quesos madurados de las faldas del Barú" },
-    about: {
-      en: "Raw-milk cheeses from a small dairy herd in Volcán. Sold at the dairy and at markets across Chiriquí. Shipping within Chiriquí only.",
-      es: "Quesos de leche cruda de un pequeño hato lechero en Volcán. Se vende en la quesería y en mercados de Chiriquí. Envíos solo dentro de Chiriquí."
-    },
-    location: { place: "volcan", label: "Volcán, Chiriquí", lat: 8.7700, lng: -82.6300 },
+    slug: "nueces-del-pacifico",
+    name: "Nueces del Pacífico",
+    tagline: { en: "Nut butters and granola from Coclé", es: "Mantequillas de nueces y granola de Coclé" },
+    about: { en: "Cashews from Aguadulce, roasted low and ground long so nothing else has to be added. The granola uses honey from the same province.",
+             es: "Marañón de Aguadulce, tostado a baja temperatura y molido por largo rato para no tener que agregar nada más. La granola usa miel de la misma provincia." },
     categories: ["food"],
-    products: ["cheese"],
-    retail: [
-      { name: "Quesería Volcán shop", label: "Volcán, Chiriquí", lat: 8.7700, lng: -82.6300 },
-      { name: "Boquete Tuesday Market", label: "Boquete, Chiriquí", lat: 8.7810, lng: -82.4380 }
+    products: ["nut-butter", "granola"],
+    base: { town: "Aguadulce", townEs: "Aguadulce", province: "Coclé", lat: 8.25, lng: -80.55 },
+    pos: [
+      { name: "Mercado Aguadulce", town: "Aguadulce", townEs: "Aguadulce", province: "Coclé", lat: 8.246, lng: -80.554 },
+      { name: "Tienda Natural Penonomé", town: "Penonomé", townEs: "Penonomé", province: "Coclé", lat: 8.5167, lng: -80.35 },
+      { name: "Orgánico Santiago", town: "Santiago", townEs: "Santiago", province: "Veraguas", lat: 8.104, lng: -80.9793 }
     ],
-    shipping: { type: "provinces", provinces: ["chiriqui"] },
-    links: { whatsapp: "https://wa.me/50760000009" },
-    tone: "#d9b382",
-    photos: [ { bg: "#d9b382", icon: "🧀" }, { bg: "#6b7a4a", icon: "🐄" } ],
-    featured: false
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "", instagram: "nuecesdelpacifico", whatsapp: "+507 6100 0109" },
+    published: true
   },
   {
-    id: "sol-de-tierra",
-    name: "Sol de Tierra",
-    tagline: { en: "Botanical skincare from Panamanian plants", es: "Cuidado botánico de la piel con plantas panameñas" },
-    about: {
-      en: "Simple, effective skincare made from Panamanian plants. Small batches, no synthetic fragrance. Based in Coronado with points of sale on both coasts.",
-      es: "Cuidado de la piel simple y efectivo hecho con plantas panameñas. Lotes pequeños, sin fragancias sintéticas. Con base en Coronado y puntos de venta en ambas costas."
-    },
-    location: { place: "coronado", label: "Coronado, Panamá Oeste", lat: 8.5170, lng: -79.8890 },
-    categories: ["skincare", "ritual"],
-    products: ["face-oil", "face-cream", "body-scrub", "soap", "candle"],
-    retail: [
-      { name: "Sol de Tierra studio", label: "Coronado, Panamá Oeste", lat: 8.5170, lng: -79.8890 },
-      { name: "Casco Viejo artisan market", label: "Panama City", lat: 8.9520, lng: -79.5340 },
-      { name: "El Valle Sunday market", label: "El Valle de Antón, Coclé", lat: 8.6010, lng: -80.1260 }
+    slug: "salsa-islena",
+    name: "Salsa Isleña",
+    tagline: { en: "Island hot sauce and coconut yogurt", es: "Salsa picante isleña y yogur de coco" },
+    about: { en: "Made on Isla Colón with scotch bonnet peppers grown on the island and coconut pressed the same day. Small runs, often sold out.",
+             es: "Elaborada en Isla Colón con ají chombo cultivado en la isla y coco prensado el mismo día. Producción pequeña, a menudo agotada." },
+    categories: ["food"],
+    products: ["hot-sauce", "coconut-yogurt"],
+    base: { town: "Bocas del Toro", townEs: "Bocas del Toro", province: "Bocas del Toro", lat: 9.34, lng: -82.24 },
+    pos: [
+      { name: "Bocas Town Market", town: "Bocas del Toro", townEs: "Bocas del Toro", province: "Bocas del Toro", lat: 9.336, lng: -82.244 },
+      { name: "Tuesday Market Boquete", town: "Boquete", townEs: "Boquete", province: "Chiriquí", lat: 8.78, lng: -82.44 }
     ],
-    shipping: { type: "nationwide" },
-    links: { website: "https://example.com", instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000010" },
-    tone: "#a3b18a",
-    photos: [ { bg: "#a3b18a", icon: "🧴" }, { bg: "#c9a66b", icon: "🌿" }, { bg: "#e0c9a6", icon: "🧼" } ],
-    featured: true
+    shipping: { type: "provinces", provinces: ["Bocas del Toro", "Chiriquí"] },
+    links: { website: "", instagram: "salsaislena", whatsapp: "+507 6100 0110" },
+    published: true
   },
   {
-    id: "jabones-de-la-abuela",
-    name: "Jabones de la Abuela",
-    tagline: { en: "Cold-process soaps from Penonomé", es: "Jabones de proceso en frío de Penonomé" },
-    about: {
-      en: "Soaps, shampoo bars and deodorant made with coconut oil and local herbs. A family workshop in Penonomé; delivery across Coclé.",
-      es: "Jabones, champús sólidos y desodorantes hechos con aceite de coco y hierbas locales. Un taller familiar en Penonomé; entregas en todo Coclé."
-    },
-    location: { place: "penonome", label: "Penonomé, Coclé", lat: 8.5200, lng: -80.3600 },
-    categories: ["skincare"],
-    products: ["soap", "shampoo-bar", "deodorant", "lip-balm"],
-    retail: [
-      { name: "Workshop storefront", label: "Penonomé, Coclé", lat: 8.5200, lng: -80.3600 },
-      { name: "Mercado Público de Penonomé", label: "Penonomé, Coclé", lat: 8.5180, lng: -80.3570 }
-    ],
-    shipping: { type: "provinces", provinces: ["cocle"] },
-    links: { instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000011" },
-    tone: "#e0c9a6",
-    photos: [ { bg: "#e0c9a6", icon: "🧼" }, { bg: "#8a9a5b", icon: "🌿" } ],
-    featured: false
-  },
-  {
-    id: "piel-de-david",
-    name: "Piel Chiricana",
-    tagline: { en: "Mineral sunscreen and hair oils from David", es: "Protector mineral y aceites capilares de David" },
-    about: {
-      en: "Reef-safe mineral sunscreen, hair oil and lip balm made in David. Sold in David and shipped to Chiriquí and Bocas del Toro.",
-      es: "Protector solar mineral seguro para arrecifes, aceite capilar y bálsamo labial hechos en David. Se vende en David y se envía a Chiriquí y Bocas del Toro."
-    },
-    location: { place: "david", label: "David, Chiriquí", lat: 8.4330, lng: -82.4330 },
-    categories: ["skincare"],
-    products: ["sunscreen", "hair-oil", "lip-balm"],
-    retail: [
-      { name: "Organic Corner David", label: "David, Chiriquí", lat: 8.4300, lng: -82.4300 }
-    ],
-    shipping: { type: "provinces", provinces: ["chiriqui", "bocas"] },
-    links: { instagram: "https://instagram.com/" },
-    tone: "#d4a373",
-    photos: [ { bg: "#d4a373", icon: "☀️" }, { bg: "#a3b18a", icon: "💧" } ],
-    featured: false
-  },
-  {
-    id: "hierbas-del-valle",
-    name: "Hierbas del Valle",
-    tagline: { en: "Teas and tinctures from El Valle", es: "Tés y tinturas de El Valle" },
-    about: {
-      en: "Herbal teas, tinctures and salves from a garden in El Valle de Antón. Grown, dried and blended by hand. Ships nationwide.",
-      es: "Tés de hierbas, tinturas y ungüentos de un jardín en El Valle de Antón. Cultivados, secados y mezclados a mano. Envíos a todo el país."
-    },
-    location: { place: "el-valle", label: "El Valle de Antón, Coclé", lat: 8.6000, lng: -80.1250 },
-    categories: ["herbs", "ritual"],
-    products: ["herbal-tea", "tincture", "salve", "incense"],
-    retail: [
-      { name: "El Valle Sunday market", label: "El Valle de Antón, Coclé", lat: 8.6010, lng: -80.1260 },
-      { name: "Altos del María community shop", label: "Altos del María, Panamá Oeste", lat: 8.6200, lng: -80.0500 },
-      { name: "Coronado Farmers Market (Sat)", label: "Coronado, Panamá Oeste", lat: 8.5200, lng: -79.8850 }
-    ],
-    shipping: { type: "nationwide" },
-    links: { website: "https://example.com", instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000013" },
-    tone: "#6b7a4a",
-    photos: [ { bg: "#6b7a4a", icon: "🍵" }, { bg: "#c9a66b", icon: "🌿" }, { bg: "#a3b18a", icon: "🫙" } ],
-    featured: true
-  },
-  {
-    id: "moringa-azuero",
-    name: "Moringa Azuero",
-    tagline: { en: "Moringa and turmeric from the dry arc", es: "Moringa y cúrcuma del arco seco" },
-    about: {
-      en: "Moringa powder, turmeric paste and elderberry syrup from a regenerative farm near Pedasí. Ships nationwide.",
-      es: "Moringa en polvo, pasta de cúrcuma y jarabe de saúco de una finca regenerativa cerca de Pedasí. Envíos a todo el país."
-    },
-    location: { place: "pedasi", label: "Pedasí, Los Santos", lat: 7.5400, lng: -80.0400 },
+    slug: "jardin-de-santa-fe",
+    name: "Jardín de Santa Fe",
+    tagline: { en: "Garden teas and honey from Veraguas", es: "Tés de jardín y miel de Veraguas" },
+    about: { en: "A hillside garden above Santa Fe where hibiscus and lemongrass grow beside the beehives. Everything is cut, dried and packed by the same three people.",
+             es: "Un jardín en la ladera sobre Santa Fe donde la flor de Jamaica y la hierba limón crecen junto a las colmenas. Todo lo cortan, secan y empacan las mismas tres personas." },
     categories: ["herbs", "food"],
-    products: ["moringa", "turmeric", "elderberry", "honey"],
-    retail: [
-      { name: "Pedasí Saturday market", label: "Pedasí, Los Santos", lat: 7.5330, lng: -80.0300 },
-      { name: "Venao surf shop shelf", label: "Playa Venao, Los Santos", lat: 7.4300, lng: -80.2000 },
-      { name: "Las Tablas health store", label: "Las Tablas, Los Santos", lat: 7.7660, lng: -80.2820 }
+    products: ["hibiscus-tea", "lemongrass-tea", "raw-honey"],
+    base: { town: "Santa Fe", townEs: "Santa Fe", province: "Veraguas", lat: 8.5167, lng: -81.0833 },
+    pos: [
+      { name: "Feria Santa Fe", town: "Santa Fe", townEs: "Santa Fe", province: "Veraguas", lat: 8.5127, lng: -81.0873 },
+      { name: "Orgánico Santiago", town: "Santiago", townEs: "Santiago", province: "Veraguas", lat: 8.1, lng: -80.9833 }
     ],
-    shipping: { type: "nationwide" },
-    links: { instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000014" },
-    tone: "#8a9a5b",
-    photos: [ { bg: "#8a9a5b", icon: "🌱" }, { bg: "#d4a373", icon: "🫚" } ],
-    featured: false
+    shipping: { type: "provinces", provinces: ["Veraguas", "Herrera", "Coclé"] },
+    links: { website: "", instagram: "jardindesantafe", whatsapp: "+507 6100 0111" },
+    published: true
   },
   {
-    id: "luna-roja",
+    slug: "hierbas-cerro-punta",
+    name: "Hierbas de Cerro Punta",
+    tagline: { en: "Highland herbs, dried and blended", es: "Hierbas de altura, secas y mezcladas" },
+    about: { en: "Grown between 1,800 and 2,000 metres where the nights are cold. Herbs are shade dried rather than heat dried, which keeps the colour and the oils.",
+             es: "Cultivadas entre 1,800 y 2,000 metros, donde las noches son frías. Las hierbas se secan a la sombra y no con calor, lo que conserva el color y los aceites." },
+    categories: ["herbs"],
+    products: ["herbal-tea", "lemongrass-tea", "moringa", "turmeric"],
+    base: { town: "Cerro Punta", townEs: "Cerro Punta", province: "Chiriquí", lat: 8.85, lng: -82.5833 },
+    pos: [
+      { name: "Mercado Cerro Punta", town: "Cerro Punta", townEs: "Cerro Punta", province: "Chiriquí", lat: 8.846, lng: -82.5873 },
+      { name: "Mercado de Volcán", town: "Volcán", townEs: "Volcán", province: "Chiriquí", lat: 8.7833, lng: -82.6333 },
+      { name: "Tuesday Market Boquete", town: "Boquete", townEs: "Boquete", province: "Chiriquí", lat: 8.784, lng: -82.436 }
+    ],
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "hierbascerropunta.com", instagram: "hierbascerropunta", whatsapp: "+507 6100 0112" },
+    published: true
+  },
+  {
+    slug: "botica-verde",
+    name: "Botica Verde",
+    tagline: { en: "Tinctures, syrups and essential oils", es: "Tinturas, jarabes y aceites esenciales" },
+    about: { en: "A herbalist practice in San Francisco that began making its own preparations because nothing on the shelf matched what the clients needed. Batch numbers are on every bottle.",
+             es: "Una práctica de herbolaria en San Francisco que empezó a hacer sus propias preparaciones porque nada en el estante coincidía con lo que necesitaban sus clientes. Cada frasco lleva número de lote." },
+    categories: ["herbs"],
+    products: ["tincture", "elderberry", "essential-oil", "hibiscus-tea"],
+    base: { town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9824, lng: -79.5199 },
+    pos: [
+      { name: "Botica Verde San Francisco", town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9784, lng: -79.5239 },
+      { name: "Coronado Market", town: "Coronado", townEs: "Coronado", province: "Panamá Oeste", lat: 8.5333, lng: -79.95 }
+    ],
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "boticaverde.com", instagram: "boticaverdepa", whatsapp: "+507 6100 0113" },
+    published: true
+  },
+  {
+    slug: "selva-botanica",
+    name: "Selva Botánica",
+    tagline: { en: "Face and body care made in El Valle", es: "Cuidado facial y corporal hecho en El Valle" },
+    about: { en: "Formulated in a small lab beside the crater. Short ingredient lists, glass packaging, and every batch tested on the founder first.",
+             es: "Formulado en un pequeño laboratorio junto al cráter. Listas de ingredientes cortas, envases de vidrio, y cada lote probado primero por la fundadora." },
+    categories: ["skincare"],
+    products: ["face-serum", "cleanser", "body-oil", "lip-balm"],
+    base: { town: "El Valle de Antón", townEs: "El Valle de Antón", province: "Coclé", lat: 8.6, lng: -80.1333 },
+    pos: [
+      { name: "Feria de El Valle", town: "El Valle de Antón", townEs: "El Valle de Antón", province: "Coclé", lat: 8.596, lng: -80.1373 },
+      { name: "Coronado Market", town: "Coronado", townEs: "Coronado", province: "Panamá Oeste", lat: 8.5333, lng: -79.95 },
+      { name: "Mercado Orgánico Casco", town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9864, lng: -79.5159 }
+    ],
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "selvabotanica.com", instagram: "selvabotanica", whatsapp: "+507 6100 0114" },
+    published: true
+  },
+  {
+    slug: "jaboneria-istmo",
+    name: "Jabonería Istmo",
+    tagline: { en: "Cold process soap and solid hair care", es: "Jabón en frío y cuidado capilar sólido" },
+    about: { en: "Cured for six weeks in Chitré before it leaves the workshop. Oils are coconut, palm free, and the scent comes from essential oils only.",
+             es: "Curado durante seis semanas en Chitré antes de salir del taller. Los aceites son de coco, sin palma, y el aroma viene solo de aceites esenciales." },
+    categories: ["skincare"],
+    products: ["soap", "shampoo-bar", "conditioner-bar"],
+    base: { town: "Chitré", townEs: "Chitré", province: "Herrera", lat: 7.9667, lng: -80.4333 },
+    pos: [
+      { name: "Súper Natural Chitré", town: "Chitré", townEs: "Chitré", province: "Herrera", lat: 7.9627, lng: -80.4373 },
+      { name: "Feria de Las Tablas", town: "Las Tablas", townEs: "Las Tablas", province: "Los Santos", lat: 7.7667, lng: -80.2833 },
+      { name: "Orgánico Santiago", town: "Santiago", townEs: "Santiago", province: "Veraguas", lat: 8.104, lng: -80.9793 }
+    ],
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "", instagram: "jaboneriaistmo", whatsapp: "+507 6100 0115" },
+    published: true
+  },
+  {
+    slug: "coco-y-cera",
+    name: "Coco y Cera",
+    tagline: { en: "Coconut based balms and mineral sunscreen", es: "Bálsamos de coco y protector solar mineral" },
+    about: { en: "Made on Isla Colón with coconut oil pressed on the archipelago. The sunscreen uses non nano zinc and is reef safe, which matters here.",
+             es: "Elaborado en Isla Colón con aceite de coco prensado en el archipiélago. El protector solar usa zinc no nano y es seguro para el arrecife, algo que aquí importa." },
+    categories: ["skincare"],
+    products: ["body-butter", "lip-balm", "deodorant", "sunscreen"],
+    base: { town: "Bocas del Toro", townEs: "Bocas del Toro", province: "Bocas del Toro", lat: 9.34, lng: -82.24 },
+    pos: [
+      { name: "Bocas Town Market", town: "Bocas del Toro", townEs: "Bocas del Toro", province: "Bocas del Toro", lat: 9.336, lng: -82.244 },
+      { name: "Mercado Colón", town: "Colón", townEs: "Colón", province: "Colón", lat: 9.3592, lng: -79.9014 }
+    ],
+    shipping: { type: "provinces", provinces: ["Bocas del Toro", "Chiriquí", "Panamá"] },
+    links: { website: "cocoycera.com", instagram: "cocoycera", whatsapp: "+507 6100 0116" },
+    published: true
+  },
+  {
+    slug: "raiz-natural",
+    name: "Raíz Natural",
+    tagline: { en: "Everyday natural care from David", es: "Cuidado natural diario desde David" },
+    about: { en: "Simple daily products at a price people in Chiriquí can actually pay. Refills cost less than the first jar, which is the whole point.",
+             es: "Productos diarios sencillos a un precio que la gente en Chiriquí realmente puede pagar. Los rellenos cuestan menos que el primer frasco, y esa es la idea." },
+    categories: ["skincare", "menstrual"],
+    products: ["deodorant", "intimate-wash", "soap"],
+    base: { town: "David", townEs: "David", province: "Chiriquí", lat: 8.4333, lng: -82.4333 },
+    pos: [
+      { name: "Orgánica David", town: "David", townEs: "David", province: "Chiriquí", lat: 8.4293, lng: -82.4373 },
+      { name: "Tuesday Market Boquete", town: "Boquete", townEs: "Boquete", province: "Chiriquí", lat: 8.78, lng: -82.44 },
+      { name: "Mercado de Volcán", town: "Volcán", townEs: "Volcán", province: "Chiriquí", lat: 8.7873, lng: -82.6293 }
+    ],
+    shipping: { type: "provinces", provinces: ["Chiriquí", "Bocas del Toro"] },
+    links: { website: "", instagram: "raiznaturalpa", whatsapp: "+507 6100 0117" },
+    published: true
+  },
+  {
+    slug: "luna-roja",
     name: "Luna Roja",
-    tagline: { en: "Reusable menstrual care, made in Panama", es: "Cuidado menstrual reutilizable, hecho en Panamá" },
-    about: {
-      en: "Cloth pads and period underwear sewn in Panama City, plus menstrual cups. Ships nationwide in discreet packaging.",
-      es: "Toallas de tela y ropa interior menstrual cosidas en Ciudad de Panamá, además de copas menstruales. Envíos a todo el país en empaque discreto."
-    },
-    location: { place: "panama-city", label: "Panama City", lat: 8.9700, lng: -79.5400 },
-    categories: ["intimate"],
-    products: ["cloth-pads", "period-underwear", "cup"],
-    retail: [
-      { name: "Luna Roja studio (by appointment)", label: "Panama City", lat: 8.9700, lng: -79.5400 },
-      { name: "Casco Viejo artisan market", label: "Panama City", lat: 8.9520, lng: -79.5340 }
+    tagline: { en: "Reusable period care", es: "Cuidado menstrual reutilizable" },
+    about: { en: "Cups, cloth pads and period underwear, with a sizing guide written in plain Spanish. Runs free workshops in schools twice a year.",
+             es: "Copas, toallas de tela y ropa interior menstrual, con una guía de tallas escrita en español sencillo. Ofrece talleres gratuitos en escuelas dos veces al año." },
+    categories: ["menstrual"],
+    products: ["menstrual-cup", "cloth-pads", "period-underwear"],
+    base: { town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9824, lng: -79.5199 },
+    pos: [
+      { name: "Botica Verde San Francisco", town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9784, lng: -79.5239 },
+      { name: "Feria La Chorrera", town: "La Chorrera", townEs: "La Chorrera", province: "Panamá Oeste", lat: 8.88, lng: -79.7833 }
     ],
-    shipping: { type: "nationwide" },
-    links: { website: "https://example.com", instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000015" },
-    tone: "#b56576",
-    photos: [ { bg: "#b56576", icon: "🌙" }, { bg: "#e0c9a6", icon: "🧵" } ],
-    featured: false
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "lunaroja.com.pa", instagram: "lunarojapa", whatsapp: "+507 6100 0118" },
+    published: true
   },
   {
-    id: "flor-de-luna",
-    name: "Flor de Luna",
-    tagline: { en: "Cloth pads from Chiriquí", es: "Toallas de tela de Chiriquí" },
-    about: {
-      en: "Hand-sewn cloth pads from a women's cooperative in David. Sold at markets in Chiriquí; shipping within Chiriquí.",
-      es: "Toallas de tela cosidas a mano por una cooperativa de mujeres en David. Se venden en mercados de Chiriquí; envíos dentro de Chiriquí."
-    },
-    location: { place: "david", label: "David, Chiriquí", lat: 8.4400, lng: -82.4200 },
-    categories: ["intimate"],
-    products: ["cloth-pads"],
-    retail: [
-      { name: "Boquete Tuesday Market", label: "Boquete, Chiriquí", lat: 8.7810, lng: -82.4380 },
-      { name: "Organic Corner David", label: "David, Chiriquí", lat: 8.4300, lng: -82.4300 }
+    slug: "ciclo-panama",
+    name: "Ciclo Panamá",
+    tagline: { en: "Cloth pads sewn in Veraguas", es: "Toallas de tela cosidas en Veraguas" },
+    about: { en: "A sewing cooperative of nine women in Santiago. Cotton is bought locally and the offcuts become the small pouches each set ships in.",
+             es: "Una cooperativa de costura de nueve mujeres en Santiago. El algodón se compra localmente y los retazos se convierten en las bolsitas en que viaja cada juego." },
+    categories: ["menstrual"],
+    products: ["cloth-pads", "period-underwear", "intimate-wash"],
+    base: { town: "Santiago", townEs: "Santiago", province: "Veraguas", lat: 8.1, lng: -80.9833 },
+    pos: [
+      { name: "Orgánico Santiago", town: "Santiago", townEs: "Santiago", province: "Veraguas", lat: 8.096, lng: -80.9873 },
+      { name: "Súper Natural Chitré", town: "Chitré", townEs: "Chitré", province: "Herrera", lat: 7.9667, lng: -80.4333 },
+      { name: "Tienda Natural Penonomé", town: "Penonomé", townEs: "Penonomé", province: "Coclé", lat: 8.5207, lng: -80.346 }
     ],
-    shipping: { type: "provinces", provinces: ["chiriqui"] },
-    links: { whatsapp: "https://wa.me/50760000016" },
-    tone: "#c98b8b",
-    photos: [ { bg: "#c98b8b", icon: "🌸" }, { bg: "#a3b18a", icon: "🧵" } ],
-    featured: false
+    shipping: { type: "provinces", provinces: ["Veraguas", "Herrera", "Los Santos", "Coclé"] },
+    links: { website: "", instagram: "ciclopanama", whatsapp: "+507 6100 0119" },
+    published: true
   },
   {
-    id: "casa-serena",
-    name: "Casa Serena",
-    tagline: { en: "Candles, bath salts and room sprays", es: "Velas, sales de baño y aromatizantes" },
-    about: {
-      en: "Soy candles, bath salts and room sprays scented with Panamanian botanicals. Made in Altos del María, shipped nationwide.",
-      es: "Velas de soya, sales de baño y aromatizantes con botánicos panameños. Hechos en Altos del María, envíos a todo el país."
-    },
-    location: { place: "altos-del-maria", label: "Altos del María, Panamá Oeste", lat: 8.6200, lng: -80.0500 },
+    slug: "vela-y-copal",
+    name: "Vela y Copal",
+    tagline: { en: "Candles, incense and room sprays", es: "Velas, incienso y esprays de ambiente" },
+    about: { en: "Poured in El Valle in small runs. Palo santo is bought only from suppliers who can show where the wood fell, never from cut trees.",
+             es: "Vertidas en El Valle en tandas pequeñas. El palo santo se compra solo a proveedores que pueden mostrar dónde cayó la madera, nunca de árboles talados." },
+    categories: ["ritual"],
+    products: ["soy-candle", "incense", "palo-santo", "room-spray"],
+    base: { town: "El Valle de Antón", townEs: "El Valle de Antón", province: "Coclé", lat: 8.6, lng: -80.1333 },
+    pos: [
+      { name: "Feria de El Valle", town: "El Valle de Antón", townEs: "El Valle de Antón", province: "Coclé", lat: 8.596, lng: -80.1373 },
+      { name: "Coronado Market", town: "Coronado", townEs: "Coronado", province: "Panamá Oeste", lat: 8.5333, lng: -79.95 },
+      { name: "Mercado Orgánico Casco", town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9864, lng: -79.5159 }
+    ],
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "velaycopal.com", instagram: "velaycopal", whatsapp: "+507 6100 0120" },
+    published: true
+  },
+  {
+    slug: "casa-ambar",
+    name: "Casa Ámbar",
+    tagline: { en: "Beeswax candles and slow made home pieces", es: "Velas de cera de abeja y piezas de hogar hechas con calma" },
+    about: { en: "A house in Pedasí that turned into a workshop. Candles in winter, ceramics when the kiln is free, and nothing made faster than it wants to be.",
+             es: "Una casa en Pedasí que se convirtió en taller. Velas en invierno, cerámica cuando el horno está libre, y nada hecho más rápido de lo que pide." },
     categories: ["ritual", "living"],
-    products: ["candle", "bath-salts", "room-spray", "incense"],
-    retail: [
-      { name: "Altos del María community shop", label: "Altos del María, Panamá Oeste", lat: 8.6200, lng: -80.0500 },
-      { name: "Coronado Farmers Market (Sat)", label: "Coronado, Panamá Oeste", lat: 8.5200, lng: -79.8850 },
-      { name: "El Valle Sunday market", label: "El Valle de Antón, Coclé", lat: 8.6010, lng: -80.1260 }
+    products: ["beeswax-candle", "room-spray", "ceramic-mug"],
+    base: { town: "Pedasí", townEs: "Pedasí", province: "Los Santos", lat: 7.5333, lng: -80.0333 },
+    pos: [
+      { name: "Tienda del Pueblo Pedasí", town: "Pedasí", townEs: "Pedasí", province: "Los Santos", lat: 7.5293, lng: -80.0373 },
+      { name: "Feria de Las Tablas", town: "Las Tablas", townEs: "Las Tablas", province: "Los Santos", lat: 7.7667, lng: -80.2833 }
     ],
-    shipping: { type: "nationwide" },
-    links: { instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000017" },
-    tone: "#bfa08a",
-    photos: [ { bg: "#bfa08a", icon: "🕯️" }, { bg: "#e0c9a6", icon: "🛁" } ],
-    featured: true
+    shipping: { type: "provinces", provinces: ["Los Santos", "Herrera", "Panamá"] },
+    links: { website: "", instagram: "casaambarpedasi", whatsapp: "+507 6100 0121" },
+    published: true
   },
   {
-    id: "nudos-y-fibras",
-    name: "Nudos y Fibras",
-    tagline: { en: "Macramé and woven baskets", es: "Macramé y canastas tejidas" },
-    about: {
-      en: "Macramé wall hangings and baskets woven from natural fibers by artisans in Santa Fe, Veraguas. Ships nationwide.",
-      es: "Tapices de macramé y canastas tejidas con fibras naturales por artesanas de Santa Fe, Veraguas. Envíos a todo el país."
-    },
-    location: { place: "santa-fe", label: "Santa Fe, Veraguas", lat: 8.5100, lng: -81.0800 },
+    slug: "taller-gorgona",
+    name: "Taller Gorgona",
+    tagline: { en: "Macramé, baskets and woven throws", es: "Macramé, canastas y mantas tejidas" },
+    about: { en: "Knotted by hand a hundred metres from the beach. Cotton cord is undyed or coloured with plant dyes, so no two runs match exactly.",
+             es: "Anudado a mano a cien metros de la playa. El cordón de algodón va sin teñir o con tintes vegetales, así que ninguna tanda es exactamente igual a otra." },
     categories: ["living"],
-    products: ["macrame", "basket", "hammock"],
-    retail: [
-      { name: "Santa Fe artisan cooperative", label: "Santa Fe, Veraguas", lat: 8.5100, lng: -81.0800 },
-      { name: "Santiago craft fair", label: "Santiago, Veraguas", lat: 8.1000, lng: -80.9830 },
-      { name: "Casco Viejo artisan market", label: "Panama City", lat: 8.9520, lng: -79.5340 }
+    products: ["macrame", "basket", "cotton-throw"],
+    base: { town: "Gorgona", townEs: "Gorgona", province: "Panamá Oeste", lat: 8.55, lng: -79.8833 },
+    pos: [
+      { name: "Gorgona Beach Store", town: "Gorgona", townEs: "Gorgona", province: "Panamá Oeste", lat: 8.546, lng: -79.8873 },
+      { name: "Coronado Market", town: "Coronado", townEs: "Coronado", province: "Panamá Oeste", lat: 8.5333, lng: -79.95 },
+      { name: "San Carlos Feria", town: "San Carlos", townEs: "San Carlos", province: "Panamá Oeste", lat: 8.4873, lng: -80.046 }
     ],
-    shipping: { type: "nationwide" },
-    links: { instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000018" },
-    tone: "#c9a66b",
-    photos: [ { bg: "#c9a66b", icon: "🧶" }, { bg: "#8a9a5b", icon: "🧺" } ],
-    featured: false
+    shipping: { type: "provinces", provinces: ["Panamá Oeste", "Panamá", "Coclé"] },
+    links: { website: "", instagram: "tallergorgona", whatsapp: "+507 6100 0122" },
+    published: true
   },
   {
-    id: "taller-madera-viva",
-    name: "Taller Madera Viva",
-    tagline: { en: "Furniture and boards from reclaimed wood", es: "Muebles y tablas de madera recuperada" },
-    about: {
-      en: "Handmade furniture, cutting boards and wooden toys from reclaimed teak and cedar. Workshop in Pedasí; furniture delivered within Los Santos and Herrera.",
-      es: "Muebles, tablas y juguetes de madera hechos a mano con teca y cedro recuperados. Taller en Pedasí; muebles entregados en Los Santos y Herrera."
-    },
-    location: { place: "pedasi", label: "Pedasí, Los Santos", lat: 7.5300, lng: -80.0350 },
-    categories: ["living", "kids"],
-    products: ["furniture", "cutting-board", "wooden-toys"],
-    retail: [
-      { name: "Workshop showroom", label: "Pedasí, Los Santos", lat: 7.5300, lng: -80.0350 },
-      { name: "Chitré design shop", label: "Chitré, Herrera", lat: 7.9610, lng: -80.4290 }
-    ],
-    shipping: { type: "provinces", provinces: ["los-santos", "herrera"] },
-    links: { instagram: "https://instagram.com/", whatsapp: "https://wa.me/50760000019" },
-    tone: "#8b5e3c",
-    photos: [ { bg: "#8b5e3c", icon: "🪵" }, { bg: "#c9a66b", icon: "🪑" } ],
-    featured: false
-  },
-  {
-    id: "ceramica-portobelo",
-    name: "Cerámica Portobelo",
-    tagline: { en: "Stoneware mugs from the Caribbean coast", es: "Tazas de gres de la costa caribeña" },
-    about: {
-      en: "Wheel-thrown mugs and bowls glazed in sea tones. Studio in Portobelo; sold in Colón and Panama City, shipped nationwide.",
-      es: "Tazas y cuencos torneados con esmaltes en tonos de mar. Taller en Portobelo; se venden en Colón y Ciudad de Panamá, envíos a todo el país."
-    },
-    location: { place: "portobelo", label: "Portobelo, Colón", lat: 9.5540, lng: -79.6560 },
+    slug: "madera-y-barro",
+    name: "Madera y Barro",
+    tagline: { en: "Wood and clay for the kitchen", es: "Madera y barro para la cocina" },
+    about: { en: "Boards from fallen cedar and mugs thrown on a kick wheel in Penonomé. Pieces are signed underneath and can be repaired rather than replaced.",
+             es: "Tablas de cedro caído y tazas torneadas en un torno de pie en Penonomé. Las piezas van firmadas por debajo y se pueden reparar en vez de reemplazar." },
     categories: ["living"],
-    products: ["ceramic-mug"],
-    retail: [
-      { name: "Studio, Portobelo", label: "Portobelo, Colón", lat: 9.5540, lng: -79.6560 },
-      { name: "Casco Viejo artisan market", label: "Panama City", lat: 8.9520, lng: -79.5340 }
+    products: ["cutting-board", "ceramic-mug", "basket"],
+    base: { town: "Penonomé", townEs: "Penonomé", province: "Coclé", lat: 8.5167, lng: -80.35 },
+    pos: [
+      { name: "Tienda Natural Penonomé", town: "Penonomé", townEs: "Penonomé", province: "Coclé", lat: 8.5127, lng: -80.354 },
+      { name: "Mercado Aguadulce", town: "Aguadulce", townEs: "Aguadulce", province: "Coclé", lat: 8.25, lng: -80.55 },
+      { name: "Feria de El Valle", town: "El Valle de Antón", townEs: "El Valle de Antón", province: "Coclé", lat: 8.604, lng: -80.1293 }
     ],
-    shipping: { type: "nationwide" },
-    links: { instagram: "https://instagram.com/" },
-    tone: "#4f8a8b",
-    photos: [ { bg: "#4f8a8b", icon: "☕" }, { bg: "#e0c9a6", icon: "🏺" } ],
-    featured: false
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "maderaybarro.com", instagram: "maderaybarro", whatsapp: "+507 6100 0123" },
+    published: true
   },
   {
-    id: "pequenos-pasos",
-    name: "Pequeños Pasos",
-    tagline: { en: "Organic cotton clothing for little ones", es: "Ropa de algodón orgánico para los más pequeños" },
-    about: {
-      en: "Children's clothing sewn in Panama City from organic cotton, plus a calendula baby balm. Ships nationwide.",
-      es: "Ropa infantil cosida en Ciudad de Panamá con algodón orgánico, además de un bálsamo de caléndula para bebé. Envíos a todo el país."
-    },
-    location: { place: "panama-city", label: "Panama City", lat: 8.9800, lng: -79.5300 },
+    slug: "pequeno-istmo",
+    name: "Pequeño Istmo",
+    tagline: { en: "Gentle care and play things for small people", es: "Cuidado suave y juguetes para los más pequeños" },
+    about: { en: "Started when the founder could not find a balm for her own baby that she was willing to use. Clothing is cotton, toys are untreated wood, nothing is scented.",
+             es: "Nació cuando la fundadora no encontró un bálsamo para su propio bebé que estuviera dispuesta a usar. La ropa es de algodón, los juguetes de madera sin tratar, y nada lleva perfume." },
     categories: ["kids", "skincare"],
-    products: ["kids-clothing", "baby-balm"],
-    retail: [
-      { name: "Mercado Urbano, Obarrio", label: "Panama City", lat: 8.9860, lng: -79.5200 },
-      { name: "Coronado Farmers Market (Sat)", label: "Coronado, Panamá Oeste", lat: 8.5200, lng: -79.8850 }
+    products: ["baby-balm", "kids-clothing", "cloth-diapers", "wooden-toy"],
+    base: { town: "Coronado", townEs: "Coronado", province: "Panamá Oeste", lat: 8.5333, lng: -79.95 },
+    pos: [
+      { name: "Coronado Market", town: "Coronado", townEs: "Coronado", province: "Panamá Oeste", lat: 8.5293, lng: -79.954 },
+      { name: "Gorgona Beach Store", town: "Gorgona", townEs: "Gorgona", province: "Panamá Oeste", lat: 8.55, lng: -79.8833 },
+      { name: "Mercado Orgánico Casco", town: "Panama City", townEs: "Ciudad de Panamá", province: "Panamá", lat: 8.9864, lng: -79.5159 }
     ],
-    shipping: { type: "nationwide" },
-    links: { website: "https://example.com", instagram: "https://instagram.com/" },
-    tone: "#e8b4a8",
-    photos: [ { bg: "#e8b4a8", icon: "🧸" }, { bg: "#a3b18a", icon: "👕" } ],
-    featured: false
+    shipping: { type: "nationwide", provinces: [] },
+    links: { website: "pequenoistmo.com", instagram: "pequenoistmo", whatsapp: "+507 6100 0124" },
+    published: true
   },
-  {
-    id: "coco-y-miel",
-    name: "Coco y Miel",
-    tagline: { en: "Coconut oil and honey from Las Lajas", es: "Aceite de coco y miel de Las Lajas" },
-    about: {
-      en: "Cold-pressed coconut oil and raw honey from a beach farm in Las Lajas. Sold locally and in David; shipped within Chiriquí and Veraguas.",
-      es: "Aceite de coco prensado en frío y miel cruda de una finca de playa en Las Lajas. Se vende localmente y en David; envíos dentro de Chiriquí y Veraguas."
-    },
-    location: { place: "las-lajas", label: "Las Lajas, Chiriquí", lat: 8.2500, lng: -81.8700 },
-    categories: ["food", "skincare"],
-    products: ["coconut-oil", "honey", "soap"],
-    retail: [
-      { name: "Farm stand, Las Lajas beach road", label: "Las Lajas, Chiriquí", lat: 8.2500, lng: -81.8700 },
-      { name: "Organic Corner David", label: "David, Chiriquí", lat: 8.4300, lng: -82.4300 }
-    ],
-    shipping: { type: "provinces", provinces: ["chiriqui", "veraguas"] },
-    links: { whatsapp: "https://wa.me/50760000021" },
-    tone: "#d9b382",
-    photos: [ { bg: "#d9b382", icon: "🥥" }, { bg: "#c9a66b", icon: "🍯" } ],
-    featured: false
-  }
 ];
-
-// Mission / About page content. Editable without touching app code.
-AQUI.mission = {
-  teaser: { en: "supporting local", es: "apoyando lo local" },
-  teaserLink: { en: "Learn more about our mission", es: "Conoce más sobre nuestra misión" },
-  title: { en: "Our mission", es: "Nuestra misión" },
-  body: {
-    en: [
-      "Many wonderful products and small brands already exist in Panama. They are simply hard to find: scattered across Instagram, WhatsApp groups, weekend markets and word of mouth.",
-      "aquí brings them together in one place. We answer two questions: what is available, and where or how can I get it?",
-      "We are not a marketplace. Nothing is sold through aquí. Once you find a brand, we send you straight to them: their website, their Instagram, their WhatsApp, or the shop down the road.",
-      "Every brand on aquí is chosen by hand. Being made in Panama is the starting point, not the whole story. We look for care, craft and honest ingredients."
-    ],
-    es: [
-      "En Panamá ya existen muchos productos maravillosos y marcas pequeñas. Simplemente son difíciles de encontrar: dispersos en Instagram, grupos de WhatsApp, ferias de fin de semana y recomendaciones.",
-      "aquí los reúne en un solo lugar. Respondemos dos preguntas: ¿qué hay disponible? y ¿dónde o cómo lo consigo?",
-      "No somos un marketplace. Nada se vende a través de aquí. Cuando encuentras una marca, te enviamos directo a ella: su sitio web, su Instagram, su WhatsApp o la tienda de la esquina.",
-      "Cada marca en aquí se elige a mano. Ser hecho en Panamá es el punto de partida, no toda la historia. Buscamos cuidado, oficio e ingredientes honestos."
-    ]
-  }
-};

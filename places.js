@@ -1,38 +1,35 @@
-// Searchable places in Panama with coordinates and province.
-// The province is what shipping coverage is matched against.
-window.AQUI = window.AQUI || {};
-AQUI.provinces = [
-  { id: "panama",        en: "Panamá",          es: "Panamá" },
-  { id: "panama-oeste",  en: "Panamá Oeste",    es: "Panamá Oeste" },
-  { id: "cocle",         en: "Coclé",           es: "Coclé" },
-  { id: "chiriqui",      en: "Chiriquí",        es: "Chiriquí" },
-  { id: "los-santos",    en: "Los Santos",      es: "Los Santos" },
-  { id: "herrera",       en: "Herrera",         es: "Herrera" },
-  { id: "veraguas",      en: "Veraguas",        es: "Veraguas" },
-  { id: "colon",         en: "Colón",           es: "Colón" },
-  { id: "bocas",         en: "Bocas del Toro",  es: "Bocas del Toro" },
-  { id: "darien",        en: "Darién",          es: "Darién" }
+/* aquí - gazetteer of search locations.
+   Add a town here and it becomes searchable everywhere in the app.
+   province must match one of the values used in brand shipping coverage. */
+
+window.PLACES = [
+  { id: 'panama-city',   en: 'Panama City',        es: 'Ciudad de Panamá',    province: 'Panamá',        lat: 8.9824,  lng: -79.5199 },
+  { id: 'la-chorrera',   en: 'La Chorrera',        es: 'La Chorrera',         province: 'Panamá Oeste',  lat: 8.8800,  lng: -79.7833 },
+  { id: 'arraijan',      en: 'Arraiján',           es: 'Arraiján',            province: 'Panamá Oeste',  lat: 8.9500,  lng: -79.6667 },
+  { id: 'coronado',      en: 'Coronado',           es: 'Coronado',            province: 'Panamá Oeste',  lat: 8.5333,  lng: -79.9500 },
+  { id: 'gorgona',       en: 'Gorgona',            es: 'Gorgona',             province: 'Panamá Oeste',  lat: 8.5500,  lng: -79.8833 },
+  { id: 'san-carlos',    en: 'San Carlos',         es: 'San Carlos',          province: 'Panamá Oeste',  lat: 8.4833,  lng: -80.0500 },
+  { id: 'altos',         en: 'Altos del María',    es: 'Altos del María',     province: 'Panamá Oeste',  lat: 8.6167,  lng: -80.0167 },
+  { id: 'el-valle',      en: 'El Valle de Antón',  es: 'El Valle de Antón',   province: 'Coclé',         lat: 8.6000,  lng: -80.1333 },
+  { id: 'penonome',      en: 'Penonomé',           es: 'Penonomé',            province: 'Coclé',         lat: 8.5167,  lng: -80.3500 },
+  { id: 'aguadulce',     en: 'Aguadulce',          es: 'Aguadulce',           province: 'Coclé',         lat: 8.2500,  lng: -80.5500 },
+  { id: 'santiago',      en: 'Santiago',           es: 'Santiago',            province: 'Veraguas',      lat: 8.1000,  lng: -80.9833 },
+  { id: 'santa-fe',      en: 'Santa Fe',           es: 'Santa Fe',            province: 'Veraguas',      lat: 8.5167,  lng: -81.0833 },
+  { id: 'chitre',        en: 'Chitré',             es: 'Chitré',              province: 'Herrera',       lat: 7.9667,  lng: -80.4333 },
+  { id: 'pese',          en: 'Pesé',               es: 'Pesé',                province: 'Herrera',       lat: 7.9000,  lng: -80.6167 },
+  { id: 'las-tablas',    en: 'Las Tablas',         es: 'Las Tablas',          province: 'Los Santos',    lat: 7.7667,  lng: -80.2833 },
+  { id: 'pedasi',        en: 'Pedasí',             es: 'Pedasí',              province: 'Los Santos',    lat: 7.5333,  lng: -80.0333 },
+  { id: 'david',         en: 'David',              es: 'David',               province: 'Chiriquí',      lat: 8.4333,  lng: -82.4333 },
+  { id: 'boquete',       en: 'Boquete',            es: 'Boquete',             province: 'Chiriquí',      lat: 8.7800,  lng: -82.4400 },
+  { id: 'volcan',        en: 'Volcán',             es: 'Volcán',              province: 'Chiriquí',      lat: 8.7833,  lng: -82.6333 },
+  { id: 'cerro-punta',   en: 'Cerro Punta',        es: 'Cerro Punta',         province: 'Chiriquí',      lat: 8.8500,  lng: -82.5833 },
+  { id: 'puerto-armuelles', en: 'Puerto Armuelles', es: 'Puerto Armuelles',   province: 'Chiriquí',      lat: 8.2833,  lng: -82.8667 },
+  { id: 'bocas',         en: 'Bocas del Toro',     es: 'Bocas del Toro',      province: 'Bocas del Toro',lat: 9.3400,  lng: -82.2400 },
+  { id: 'colon',         en: 'Colón',              es: 'Colón',               province: 'Colón',         lat: 9.3592,  lng: -79.9014 },
+  { id: 'portobelo',     en: 'Portobelo',          es: 'Portobelo',           province: 'Colón',         lat: 9.5500,  lng: -79.6500 }
 ];
-AQUI.places = [
-  { id: "panama-city",     name: "Panama City",       es: "Ciudad de Panamá", province: "panama",       lat: 8.9824, lng: -79.5199 },
-  { id: "casco-viejo",     name: "Casco Viejo",       province: "panama",       lat: 8.9525, lng: -79.5350 },
-  { id: "coronado",        name: "Coronado",          province: "panama-oeste", lat: 8.5170, lng: -79.8890 },
-  { id: "altos-del-maria", name: "Altos del María",   province: "panama-oeste", lat: 8.6200, lng: -80.0500 },
-  { id: "el-valle",        name: "El Valle de Antón", province: "cocle",        lat: 8.6000, lng: -80.1250 },
-  { id: "penonome",        name: "Penonomé",          province: "cocle",        lat: 8.5190, lng: -80.3560 },
-  { id: "anton",           name: "Antón",             province: "cocle",        lat: 8.3970, lng: -80.2600 },
-  { id: "aguadulce",       name: "Aguadulce",         province: "cocle",        lat: 8.2440, lng: -80.5430 },
-  { id: "santiago",        name: "Santiago",          province: "veraguas",     lat: 8.1000, lng: -80.9830 },
-  { id: "santa-fe",        name: "Santa Fe",          province: "veraguas",     lat: 8.5100, lng: -81.0800 },
-  { id: "chitre",          name: "Chitré",            province: "herrera",      lat: 7.9610, lng: -80.4290 },
-  { id: "las-tablas",      name: "Las Tablas",        province: "los-santos",   lat: 7.7660, lng: -80.2820 },
-  { id: "pedasi",          name: "Pedasí",            province: "los-santos",   lat: 7.5330, lng: -80.0300 },
-  { id: "playa-venao",     name: "Playa Venao",       province: "los-santos",   lat: 7.4300, lng: -80.2000 },
-  { id: "david",           name: "David",             province: "chiriqui",     lat: 8.4330, lng: -82.4330 },
-  { id: "boquete",         name: "Boquete",           province: "chiriqui",     lat: 8.7800, lng: -82.4400 },
-  { id: "volcan",          name: "Volcán",            province: "chiriqui",     lat: 8.7700, lng: -82.6300 },
-  { id: "las-lajas",       name: "Las Lajas",         province: "chiriqui",     lat: 8.2500, lng: -81.8700 },
-  { id: "bocas-town",      name: "Bocas del Toro",    province: "bocas",        lat: 9.3400, lng: -82.2400 },
-  { id: "colon",           name: "Colón",             province: "colon",        lat: 9.3590, lng: -79.9000 },
-  { id: "portobelo",       name: "Portobelo",         province: "colon",        lat: 9.5540, lng: -79.6560 }
+
+window.PROVINCES = [
+  'Bocas del Toro', 'Coclé', 'Colón', 'Chiriquí', 'Darién',
+  'Herrera', 'Los Santos', 'Panamá', 'Panamá Oeste', 'Veraguas'
 ];
